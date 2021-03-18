@@ -1,0 +1,44 @@
+DATASET:
+  NAME: "1-Foot"
+DATALOADER:
+  TYPE: "FLICKR"
+  KEY: ""
+  SECRET: ""
+  KEYWORDS: ["Neymar","Ronaldo"]
+  COUNT: 10
+  MINSIZE: 1000
+  MAXSIZE: 1600
+PROCESS:
+  BBOX: "yes"
+  RESIZE: "yes"
+  POSE_ESTIMATION: "yes"
+  ORDER: ["loader","bbox","pose_estimation","resize"]
+BBOX:
+  VIS_PRED: "yes"
+  TRESH: 0.8
+  MIN_SIZE: 30
+  PATH_PROCESS: "raw"
+  ONLY_ONE: "yes"
+  SAVE_PRED: "yes"
+RESIZE:
+  SIZE: "500x500"
+  INTERPOLATION: 2
+  PATH_PROCESS: "pose_estimation/bbox_raw"
+POSE_ESTIMATION:
+  VIS_PRED: "yes"
+  TRESH: 0.4
+  PATH_PROCESS: "bbox/raw"
+  ONLY_ONE: "no"
+  SAVE_RGB: "yes"
+  SAVE_BLACK: "yes"
+  SAVE_OTHER: "no"
+  PATH_OTHER: ""
+  DRAW_THICKNESS_LINES: 2
+  DRAW_THICKNESS_POINTS: 0
+  MODEL: 136
+ 
+ 
+
+  
+ 
+  
