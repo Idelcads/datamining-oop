@@ -1,4 +1,4 @@
-# Dataset-Generetor
+# Dataset-Generetor (March 2021)
 
 This code have been developed following my need to generate or compute large dataset for deep-learning applications. 
 This project is developed in OOP following another similar project that I had initially written following script method. [***datamining-scripts***](https://github.com/Idelcads/datamining-scripts)
