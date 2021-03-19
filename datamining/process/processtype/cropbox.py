@@ -45,6 +45,7 @@ class CropBox():
                         box = label._boxes
                         x, y = int(box._x), int(box._y)
                         heigth, width = int(box._heigth), int(box._width)
+                        score = box._score
                         x_end, y_end = CropBox.end(width_org,x+width), CropBox.end(heigth_org,y+heigth)
                         confidence_keypoints = label._keypoints._confidence
                         try:
@@ -53,7 +54,7 @@ class CropBox():
                             new_img = original_image[y:y+heigth,x:x+width]
 
                         if (int((new_img.shape[0]*100)/heigth_org) > self._box_min_size or int((new_img.shape[1]*100)/width_org) > self._box_min_size):# condition taille de la box
-                            if mean(confidence_keypoints) > self._tresh: # condition sur la condidence : cas sur la moyenne
+                            if score > self._tresh: # condition sur la condidence : cas sur la moyenne
                             # if confidence_keypoints[0] > self._tresh and confidence_keypoints[-1] > self._tresh # condition sur la condidence : cas sur la 1er et last value
                                 #write new image on datas
                                 if i ==0: #in this case we can just replace original data
