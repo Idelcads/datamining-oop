@@ -15,7 +15,7 @@ PROCESS:
   ORDER: ["loader","bbox","resize","pose_estimation"] # Order in which the tasks are carried out
 BBOX:
   VIS_PRED: "yes" # save Alphapose prediction visualisation
-  TRESH: 0.8
+  TRESH: 2.5 # bad score value is below 2 and good score valur is above 2.5 in general with alphapose
   MIN_SIZE: 30 # Minimum size of the bbox compare to the input image in percentage
   PATH_PROCESS: "raw"
   ONLY_ONE: "no" # extract only one box of the image
