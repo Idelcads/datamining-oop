@@ -1,46 +1,48 @@
 DATASET:
-  NAME: "1-Foot" # Name of the general folder.
+  NAME: "example" # Name of the general folder.
 DATALOADER:
   TYPE: "FLICKR" # Available are FLICKR or LOCAL. If local, images have to be in DATASET.NAME/raw/
   KEY: "key" # personal flickr key
   SECRET: "secret"  # personal flickr secret
   KEYWORDS: ["Neymar","Ronaldo"] # keyword list for flickr search
-  COUNT: 10 # Number of images to download
+  COUNT: 2 # Number of images to download
   MINSIZE: 1000 #  Size of images to download
   MAXSIZE: 1600 # available size on flickr: [4096,3072,2048,1600,1024,800,640,400,320,240,100]
 PROCESS:
   BBOX: "yes"
   RESIZE: "yes"
   POSE_ESTIMATION: "yes"
-  ORDER: ["loader","bbox","resize","pose_estimation"] # Order in which the tasks are carried out
+  DENSEPOSE: "yes"
+  ORDER: ["loader","bbox","densepose","pose_estimation","resize"] # Order in which the tasks are carried out
 BBOX:
   VIS_PRED: "yes" # save Alphapose prediction visualisation
-  TRESH: 2.5 # bad score value is below 2 and good score valur is above 2.5 in general with alphapose
-  MIN_SIZE: 30 # Minimum size of the bbox compare to the input image in percentage
+  TRESH: 2.5 # good value around 2.2
+  MIN_SIZE_HEIGTH: 30 # Minimum size of the bbox heigth compare to the input image heigth in percentage
+  MIN_SIZE_WIDTH: 10	# Minimum size of the bbox width compare to the input image width in percentage
   PATH_PROCESS: "raw"
-  ONLY_ONE: "no" # extract only one box of the image
+  ONLY_ONE: "yes" # extract only one box of the image based on prediction with the biggest area
   SAVE_PRED: "yes" # save extracted box
 RESIZE:
   SIZE: "500x500" #new_width x new_heigth
   INTERPOLATION: 2 # 0=cv2.INTER_NEAREST, 1=cv2.INTER_LINEAR, 2=cv2.INTER_CUBIC, 3=cv2.INTER_AREA, 4=cv2.INTER_LANCZOS4
-  PATH_PROCESS: "bbox/raw" # specifie which images to resize
+  PATH_PROCESS: "pose_estimation/bbox_raw/other" # specifie which images to resize
 POSE_ESTIMATION:
-  VIS_PRED: "yes"
+  VIS_PRED: "no"
   TRESH: 0.4
-  PATH_PROCESS: "resize/bbox_raw"
-  ONLY_ONE: "no"
+  PATH_PROCESS: "bbox/raw"
+  ONLY_ONE: "yes" # extract only one box of the image based on prediction with the biggest area
   SAVE_RGB: "yes" 
   SAVE_BLACK: "yes"
-  SAVE_OTHER: "no"
-  PATH_OTHER: "/home/pc/Documents/Path_containing_other_images_with_same_name_as_input/"
+  SAVE_OTHER: "yes"
+  PATH_OTHER: "/Path_to_dataset-gen/example/densepose/bbox_raw/green/"
   DRAW_THICKNESS_LINES: 2
   DRAW_THICKNESS_POINTS: 0
   MODEL: 136 # Number of keypoints to detect. 136, 26, 17
- 
+DENSEPOSE:
+  PATH_PROCESS: "bbox/raw"
+  ONLY_ONE: "yes"
+  SAVE_BLACK: "yes"
+  SAVE_RGB: "yes"
+  SAVE_GREEN: "yes"
+  TRESH: 0.7
 
-
-
-
-  
- 
-  

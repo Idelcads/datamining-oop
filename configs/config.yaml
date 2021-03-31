@@ -1,42 +1,51 @@
 DATASET:
-  NAME: "1-Foot"
+  NAME: "Neymar"
 DATALOADER:
-  TYPE: "FLICKR"
+  TYPE: "LOCAL"
   KEY: ""
   SECRET: ""
-  KEYWORDS: ["Neymar","Ronaldo"]
-  COUNT: 10
+  KEYWORDS: ["Neymar"]
+  COUNT: 20
   MINSIZE: 1000
   MAXSIZE: 1600
 PROCESS:
   BBOX: "yes"
   RESIZE: "yes"
   POSE_ESTIMATION: "yes"
-  ORDER: ["loader","bbox","pose_estimation","resize"]
+  DENSEPOSE: "yes"
+  ORDER: ["loader","bbox","densepose","pose_estimation","resize"]
 BBOX:
-  VIS_PRED: "yes"
-  TRESH: 0.8
-  MIN_SIZE: 30
+  VIS_PRED: "no"
+  TRESH: 2.0
+  MIN_SIZE_HEIGTH: 2
+  MIN_SIZE_WIDTH: 15
   PATH_PROCESS: "raw"
   ONLY_ONE: "yes"
   SAVE_PRED: "yes"
 RESIZE:
   SIZE: "500x500"
   INTERPOLATION: 2
-  PATH_PROCESS: "pose_estimation/bbox_raw"
+  PATH_PROCESS: "pose_estimation/bbox_raw/other"
 POSE_ESTIMATION:
-  VIS_PRED: "yes"
+  VIS_PRED: "no"
   TRESH: 0.4
   PATH_PROCESS: "bbox/raw"
-  ONLY_ONE: "no"
+  ONLY_ONE: "yes"
   SAVE_RGB: "yes"
   SAVE_BLACK: "yes"
-  SAVE_OTHER: "no"
-  PATH_OTHER: ""
+  SAVE_OTHER: "yes"
+  PATH_OTHER: "/home/pc/Documents/Path_containing_images_with_same_name_as_input/"
   DRAW_THICKNESS_LINES: 2
   DRAW_THICKNESS_POINTS: 0
   MODEL: 136
- 
+DENSEPOSE:
+  PATH_PROCESS: "bbox/raw"
+  ONLY_ONE: "yes"
+  SAVE_BLACK: "yes"
+  SAVE_RGB: "yes"
+  SAVE_GREEN: "yes"
+  TRESH: 0.7
+  
  
 
   
