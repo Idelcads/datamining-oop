@@ -17,7 +17,8 @@ class AlphaPoseMapper():
             self._tresh = config.POSE_ESTIMATION.TRESH
             self._model = config.POSE_ESTIMATION.MODEL
             self._outputpath = os.path.join(os.getcwd(),'datasets', config.DATASET.NAME, 'temp/pose')
-            
+
+        os.makedirs(self._outputpath, exist_ok=True)
         self._cfg, self._chekpoint = AlphaPoseMapper.check_model(self._model)
         self._cmd = 'python3 scripts/demo_inference.py --indir ' + self._inputpath + ' --outdir ' + self._outputpath\
                + ' --cfg ' + self._cfg + ' --checkpoint ' + self._chekpoint 

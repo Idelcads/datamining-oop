@@ -57,3 +57,49 @@ class Boxes():
         self._width = box[2]
         self._heigth = box[3]
         self._category = cat
+
+class DensePred():
+    def __init__(self, pklfile):
+        self._image_id = []
+        size=len(pklfile._data)
+        self._densepred = DensePred.init_list_of_objects(size)
+        i = 0
+        for pkldata in pklfile._data: # For each images
+            for pred_it in range(len(pkldata['pred_boxes_XYXY'])): #For each prefiction on the image
+                # self._denselabel = DenseLabels(pkldata['scores'][pred_it], pkldata['pred_boxes_XYXY'][pred_it], pkldata['pred_densepose'][pred_it], pkldata['file_name'])
+                # self._densepred[i].append(self._denselabel)
+                self._densepred[i].append(DenseLabels(pkldata['scores'][pred_it], pkldata['pred_boxes_XYXY'][pred_it], pkldata['pred_densepose'][pred_it], pkldata['file_name']))
+            i+=1
+        a=0
+    
+    def init_list_of_objects(size):
+        list_of_objects = list()
+        for i in range(0,size):
+            list_of_objects.append( list() ) #different object reference each time
+        return list_of_objects
+
+class DenseLabels():
+    def __init__(self, score, boxes, mask, name):
+
+        box_dense_to_alpha = DenseLabels.box_translate(boxes)
+        self._boxes = Boxes(box_dense_to_alpha, score, 0)
+
+        self._image_name = name
+        self._score = score.numpy()
+
+        mask = DenseLabels.mask_translate(mask)
+        self._mask = mask
+
+    
+    def box_translate(boxes): # needed to transform xmax and ymax into width and heigth
+        xmin, ymin, xmax, ymax = int(boxes[0]), int(boxes[1]), int(boxes[2]), int(boxes[3])
+        boxes = [xmin, ymin, xmax-xmin, ymax-ymin]
+        return boxes
+
+    def mask_translate(mask): # needed to transform tensor gpu array into numpy array
+        try:
+            mask = mask.labels.numpy()
+        except:
+            mask = mask.labels.cpu()
+            mask = mask.numpy()
+        return mask

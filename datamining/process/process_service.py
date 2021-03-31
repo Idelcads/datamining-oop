@@ -2,11 +2,16 @@ from .processtype.process_type import ProcessType
 from .processtype.resize import Resize
 from .processtype.cropbox import CropBox
 from .processtype.drawpose import DrawPose
+from .processtype.drawdensepose import DrawDensePose
 from .processtype.crop import Crop
 from datamining.util.util import mkdirs, ReadFile
-from datamining.data.labels import AlphaPred
+from datamining.data.labels import AlphaPred, DensePred
 import cv2
 import os, shutil
+
+
+import numpy as np
+import torch
 
 class ProcessServiceResizeCrop():
     def __init__(self, config):
@@ -128,6 +133,85 @@ class ProcessServiceAlphaBox():
             except:
                 pass
 
+class ProcessServiceDensePose():
+    def __init__(self, config):
+        self._process_list = []
+        self._dataname = config.DATASET.NAME
+        self._datas = None
+        self._densepose = config.PROCESS.DENSEPOSE
+ 
+        if (self._densepose == 'yes'):
+            self._process_dir = config.DENSEPOSE.PATH_PROCESS
+
+            # write command to launch AlphaPose
+            from ..segment.detectron.detectron_mapper import DensePoseMapper
+            mapper = DensePoseMapper(config,self._process_dir)
+            mapper.run()
+
+            # READ .pkl file 
+            self._pklfile = ReadFile('pkl_densepose', mapper._outputpath, 'results.pkl' )
+            self._densepred = DensePred(self._pklfile)
+            
+            # Draw DensePose Estimation on images
+            drawdensepose = DrawDensePose(config, self._densepred)
+            self._process_list.append(drawdensepose)
+            
+            # What to save
+            self._savergb = config.DENSEPOSE.SAVE_RGB
+            self._saveblack = config.DENSEPOSE.SAVE_BLACK
+            self._savegreen = config.DENSEPOSE.SAVE_GREEN
+            # OutputPath
+            self._inputfolder = config.DENSEPOSE.PATH_PROCESS
+            pos = self._inputfolder.find('/')
+            if pos !=-1:
+                self._inputfolder = self._inputfolder[0:pos] + '_' + self._inputfolder[pos+1:]
+            else:
+                self._inputfolder = self._inputfolder
+            self._outputpath = os.path.join(os.getcwd(),'datasets',self._dataname, 'densepose/' + self._inputfolder)
+
+
+    def run(self, datas):
+        self._datas = datas
+        for process in self._process_list:
+            self._datas, self._datas_black, self._datas_green = process.process(self._datas)
+        
+    def save(self):
+        if self._densepose == 'yes':
+            # save rgb images
+            if self._savergb == 'yes':
+                glob_path = self._datas[0]._path[:-(len(self._datas[0]._name)+4)]
+                for data in self._datas:
+                    img_name = data.name
+                    path = data.path[:-len(img_name)]
+                    os.makedirs(path, exist_ok=True)
+                    try:
+                        cv2.imwrite(path + img_name, data.binary)
+                    except:
+                        pass
+            # save black images
+            if self._saveblack == 'yes':
+                for data in self._datas_black:
+                    img_name = data.name
+                    path = data.path[:-len(img_name)]
+                    os.makedirs(path, exist_ok=True)
+                    try:
+                        cv2.imwrite(path + img_name, data.binary)
+                    except:
+                        pass
+            # save green images
+            if self._savegreen == 'yes':
+                for data in self._datas_green:
+                    img_name = data.name
+                    path = data.path[:-len(img_name)]
+                    os.makedirs(path, exist_ok=True)
+                    try:
+                        cv2.imwrite(path + img_name, data.binary)
+                    except:
+                        pass
+            # delete temp folder
+            path_temp_rm = os.path.join('datasets', self._dataname, 'temp')
+            shutil.rmtree(path_temp_rm)
+
 class ProcessServiceAlphaPose():
     def __init__(self, config):
         self._process_list = []
@@ -160,7 +244,7 @@ class ProcessServiceAlphaPose():
             self._savergb = config.POSE_ESTIMATION.SAVE_RGB
             self._saveblack = config.POSE_ESTIMATION.SAVE_BLACK
             self._saveother = config.POSE_ESTIMATION.SAVE_OTHER
-
+            self._vispred = config.POSE_ESTIMATION.VIS_PRED
             # OutputPath
             self._inputfolder = config.POSE_ESTIMATION.PATH_PROCESS
             pos = self._inputfolder.find('/')

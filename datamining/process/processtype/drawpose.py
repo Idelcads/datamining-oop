@@ -53,79 +53,97 @@ class DrawPose():
                         channel = original_image.shape[2]
                     except:
                         channel = 0
-                    # initialise new image rgb, black and other
-                    new_img_rgb = original_image
+                    # initialise new rgb image with condition to delete 4th channel
+                    if channel < 4:
+                        new_img_rgb = original_image
+                    else:
+                        new_img_rgb = original_image[:,:,0:3]
+                    # initialise new black image with condition to delete 4th channel
                     if self._saveblack == 'yes':
-                        new_img_black = cv2.imread(image.path, cv2.IMREAD_UNCHANGED)
-                        new_img_black[:] = 0 
+                        original_black = cv2.imread(image.path, cv2.IMREAD_UNCHANGED)
+                        if channel < 4:
+                            new_img_black = original_black
+                            new_img_black[:] = 0 
+                        else:
+                            new_img_black = original_black[:,:,0:3]
+                            new_img_black[:] = 0 
+                    # initialise new other image with condition to delete 4th channel
                     if self._saveother == 'yes':
-                        new_img_other = cv2.imread(self._pathother + image._name, cv2.IMREAD_UNCHANGED)
+                        original_other = cv2.imread(self._pathother + image._name, cv2.IMREAD_UNCHANGED)
+                        if channel < 4:
+                            new_img_other = original_other
+                        else:
+                            new_img_other = original_other[:,:,0:3]
+
+                    #Search of the prediction with biggest area for only_one condition
+                    area = []
+                    for label in image_alphalabel:
+                        #variable to store area of all extracted box
+                        box = label._boxes
+                        heigth, width = int(box._heigth), int(box._width)
+                        area.append(heigth*width)
+
                     #Draw Pose Estimation in function of number of prediction
                     for label in image_alphalabel:
+                        box = label._boxes
+                        heigth, width = int(box._heigth), int(box._width)
+                        area_img = heigth*width
                         #Read keypoints position and confidence score:
                         keypoints = label._keypoints
                         x, y = keypoints._x, keypoints._y 
                         keypoints_len, confidence = keypoints._len, keypoints._confidence
                         
-                        #Draw keypoints and lines:
-                        if self._savergb == 'yes':
-                            new_img_rgb = draw_keypoints(self._color._pointcolor, self._color._pair, new_img_rgb, x, y, confidence, self._thickness_points, self._tresh, self._model)
-                            new_img_rgb = draw_lines(self._color._linecolor, self._color._pair, new_img_rgb, x, y, confidence, self._thickness_lines, self._tresh, self._model)
-                        if self._saveblack == 'yes':
-                            new_img_black = draw_keypoints(self._color._pointcolor, self._color._pair, new_img_black, x, y, confidence, self._thickness_points, self._tresh, self._model)
-                            new_img_black = draw_lines(self._color._linecolor, self._color._pair, new_img_black, x, y, confidence, self._thickness_lines, self._tresh, self._model)
-                        if self._saveother == 'yes':
-                            try:
-                                new_img_other = draw_keypoints(self._color._pointcolor, self._color._pair, new_img_other, x, y, confidence, self._thickness_points, self._tresh, self._model)
-                                new_img_other = draw_lines(self._color._linecolor, self._color._pair, new_img_other, x, y, confidence, self._thickness_lines, self._tresh, self._model)
-                            except:
-                                print('\033[91m','POSE_ESTIMATION : PATH_OTHER for other images is wrong or other images don''t have the same name than original ones.','\033[0m')
+                        if area_img == max(area) and self._only_one == 'yes': #draw only prediction with biggest area
+                            #Draw keypoints and lines:
+                            if self._savergb == 'yes':
+                                new_img_rgb = draw_keypoints(self._color._pointcolor, self._color._pair, new_img_rgb, x, y, confidence, self._thickness_points, self._tresh, self._model)
+                                new_img_rgb = draw_lines(self._color._linecolor, self._color._pair, new_img_rgb, x, y, confidence, self._thickness_lines, self._tresh, self._model)
+                            if self._saveblack == 'yes':
+                                new_img_black = draw_keypoints(self._color._pointcolor, self._color._pair, new_img_black, x, y, confidence, self._thickness_points, self._tresh, self._model)
+                                new_img_black = draw_lines(self._color._linecolor, self._color._pair, new_img_black, x, y, confidence, self._thickness_lines, self._tresh, self._model)
+                            if self._saveother == 'yes':
+                                try:
+                                    new_img_other = draw_keypoints(self._color._pointcolor, self._color._pair, new_img_other, x, y, confidence, self._thickness_points, self._tresh, self._model)
+                                    new_img_other = draw_lines(self._color._linecolor, self._color._pair, new_img_other, x, y, confidence, self._thickness_lines, self._tresh, self._model)
+                                except:
+                                    print('\033[91m','POSE_ESTIMATION : PATH_OTHER for other images is wrong or other images don''t have the same name than original ones.','\033[0m')
+                        elif self._only_one == 'no': #draw all prediction 
+                            #Draw keypoints and lines:
+                            if self._savergb == 'yes':
+                                new_img_rgb = draw_keypoints(self._color._pointcolor, self._color._pair, new_img_rgb, x, y, confidence, self._thickness_points, self._tresh, self._model)
+                                new_img_rgb = draw_lines(self._color._linecolor, self._color._pair, new_img_rgb, x, y, confidence, self._thickness_lines, self._tresh, self._model)
+                            if self._saveblack == 'yes':
+                                new_img_black = draw_keypoints(self._color._pointcolor, self._color._pair, new_img_black, x, y, confidence, self._thickness_points, self._tresh, self._model)
+                                new_img_black = draw_lines(self._color._linecolor, self._color._pair, new_img_black, x, y, confidence, self._thickness_lines, self._tresh, self._model)
+                            if self._saveother == 'yes':
+                                try:
+                                    new_img_other = draw_keypoints(self._color._pointcolor, self._color._pair, new_img_other, x, y, confidence, self._thickness_points, self._tresh, self._model)
+                                    new_img_other = draw_lines(self._color._linecolor, self._color._pair, new_img_other, x, y, confidence, self._thickness_lines, self._tresh, self._model)
+                                except:
+                                    print('\033[91m','POSE_ESTIMATION : PATH_OTHER for other images is wrong or other images don''t have the same name than original ones.','\033[0m')
 
                         #write new image datas, datas_black and datas_other
-                        if i ==0: #in this case we write the first prediction draw on image
-                            # RGB images write on datas
-                            self._index = image._id
-                            if self._savergb == 'yes':
-                                image.binary = new_img_rgb
-                                new_folder = os.path.join(os.getcwd(),'datasets',self._datasetname, 'pose_estimation/' + self._inputfolder, 'rgb')
-                                image._path= os.path.join(new_folder , img_name)
-                            # black images write on new datas
-                            if self._saveblack == 'yes':
-                                new_folder = os.path.join(os.getcwd(),'datasets',self._datasetname, 'pose_estimation/' + self._inputfolder, 'black')
-                                new_path = os.path.join(new_folder , img_name)
-                                datas_b = Data(self._index, img_name, "IMAGE", new_path)
-                                datas_b.binary = new_img_black
-                                datas_black.append(datas_b)
-                                # other images write on new datas
-                            if self._saveother == 'yes':
-                                new_folder = os.path.join(os.getcwd(),'datasets',self._datasetname, 'pose_estimation/' + self._inputfolder, 'other')
-                                new_path = os.path.join(new_folder , img_name)
-                                datas_o = Data(self._index, img_name, "IMAGE", new_path)
-                                datas_o.binary = new_img_other
-                                datas_other.append(datas_o)
-                            i +=1
-                        elif i != 0 and self._only_one == 'no': #in this case we write the other prediction on image (condition sur only_one)
-                            # RGB images write on datas
-                            self._index = image._id
-                            if self._savergb == 'yes':
-                                image.binary = new_img_rgb
-                                new_folder = os.path.join(os.getcwd(),'datasets',self._datasetname, 'pose_estimation/' + self._inputfolder, 'rgb')
-                                image._path= os.path.join(new_folder , img_name)
-                            # black images write on new datas
-                            if self._saveblack == 'yes':
-                                new_folder = os.path.join(os.getcwd(),'datasets',self._datasetname, 'pose_estimation/' + self._inputfolder, 'black')
-                                new_path = os.path.join(new_folder , img_name)
-                                datas_b = Data(self._index, img_name, "IMAGE", new_path)
-                                datas_b.binary = new_img_black
-                                datas_black.append(datas_b)
-                            # other images write on new datas
-                            if self._saveother == 'yes':
-                                new_folder = os.path.join(os.getcwd(),'datasets',self._datasetname, 'pose_estimation/' + self._inputfolder, 'other')
-                                new_path = os.path.join(new_folder , img_name)
-                                datas_o = Data(self._index, img_name, "IMAGE", new_path)
-                                datas_o.binary = new_img_other
-                                datas_other.append(datas_o)
-                            i +=1
+                        # RGB images write on datas
+                        self._index = image._id
+                        if self._savergb == 'yes':
+                            image.binary = new_img_rgb
+                            new_folder = os.path.join(os.getcwd(),'datasets',self._datasetname, 'pose_estimation/' + self._inputfolder, 'rgb')
+                            image._path= os.path.join(new_folder , img_name)
+                        # black images write on new datas
+                        if self._saveblack == 'yes':
+                            new_folder = os.path.join(os.getcwd(),'datasets',self._datasetname, 'pose_estimation/' + self._inputfolder, 'black')
+                            new_path = os.path.join(new_folder , img_name)
+                            datas_b = Data(self._index, img_name, "IMAGE", new_path)
+                            datas_b.binary = new_img_black
+                            datas_black.append(datas_b)
+                        # other images write on new datas
+                        if self._saveother == 'yes':
+                            new_folder = os.path.join(os.getcwd(),'datasets',self._datasetname, 'pose_estimation/' + self._inputfolder, 'other')
+                            new_path = os.path.join(new_folder , img_name)
+                            datas_o = Data(self._index, img_name, "IMAGE", new_path)
+                            datas_o.binary = new_img_other
+                            datas_other.append(datas_o)
+                        i +=1
 
 
         return datas, datas_black, datas_other
@@ -170,7 +188,7 @@ def draw_lines(color, pair, img, x, y, confidence, thickness, tresh, model):
             if start_p in part_line and end_p in part_line:
                 start_xy = part_line[start_p]
                 end_xy = part_line[end_p]
-                bg = img
+                bg = cv2.UMat(img)
                 X = (start_xy[0], end_xy[0])
                 Y = (start_xy[1], end_xy[1])
                 # if i < 24 or i > 83 :

@@ -1,7 +1,7 @@
 from .config.loader.config_loader import ConfigLoader
 from .data.dataloader.flickr_loader import FlickrLoader
 from .data.dataloader.local_loader import LocalLoader
-from .process.process_service import ProcessServiceResizeCrop, ProcessServiceAlphaBox, ProcessServiceAPI, ProcessServiceAlphaPose
+from .process.process_service import ProcessServiceResizeCrop, ProcessServiceAlphaBox, ProcessServiceAPI, ProcessServiceAlphaPose, ProcessServiceDensePose
 
 
 class DataminingResizeCrop():
@@ -76,6 +76,26 @@ class DataminingAlphaPose():
                                         )
 
         self._processService = ProcessServiceAlphaPose(cfg) # TODO replace cfg by variable
+
+    
+    def run(self):
+        images = self._dataLoader.load()
+        
+        self._processService.run(images)
+        self._processService.save()
+
+class DataminingDensePose():
+
+    def __init__(self, configService: ConfigLoader):
+        self._configService = configService
+        cfg = self._configService.cfg
+        self.path = cfg.DENSEPOSE.PATH_PROCESS
+
+        self._dataLoader = LocalLoader(cfg.DATASET.NAME,
+                                        self.path
+                                        )
+
+        self._processService = ProcessServiceDensePose(cfg) # TODO replace cfg by variable
 
     
     def run(self):
